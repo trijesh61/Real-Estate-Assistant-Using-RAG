@@ -1,4 +1,6 @@
 from uuid import uuid4
+import warnings
+warnings.filterwarnings('ignore')
 
 
 from dotenv import load_dotenv
@@ -42,13 +44,14 @@ def initialize_components():
 
 
 def process_urls(urls):
-    print("Initialize components")
+    yield "Initializing components...."
     initialize_components()
+    yield "Resetting Vector Store...."
     vector_store.reset_collection()
 
 
     # Document Loading From Urls
-    print("Loading Documents")
+    yield "Loading data...."
     headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept-Language": "en-US,en;q=0.9",
@@ -60,15 +63,17 @@ def process_urls(urls):
     data=loader.load()
     
     # Document Splitting
-    print("Splitting Docs")
+
+    yield "Splitting data into chunks...."
     text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n","\n","."," "],chunk_size=200)
     docs = text_splitter.split_documents(data)
 
 
     # Adding Documents to vector DB
-    print("Storing Docs")
+    yield "Adding documents to vector database...."
     uuids=[str(uuid4()) for _ in range(len(docs))]
     vector_store.add_documents(docs, ids=uuids)
+    yield "Done adding docs to vector database...."
 
 
 def generate_answer(query):
@@ -77,7 +82,7 @@ def generate_answer(query):
 
     chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vector_store.as_retriever())
     result = chain.invoke({"question": query}, return_only_outputs=True)
-    sources = result.get("sources", "")
+    sources = result.get("sources", " ")
 
     return result['answer'], sources    
 
