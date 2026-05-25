@@ -88,14 +88,17 @@ def generate_answer(query):
 
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     urls = [
         "https://www.cnbc.com/2024/12/21/how-the-federal-reserves-rate-policy-affects-mortgages.html",
         "https://www.cnbc.com/2024/12/20/why-mortgage-rates-jumped-despite-fed-interest-rate-cut.html"
     ]
-    
-    process_urls(urls)
-    answer, sources = generate_answer("Tell me what was the 30 year fixed mortagate rate along with the date?")
+
+    # Consume the generator so the code inside actually executes
+    for status in process_urls(urls):
+        print(status)
+
+    answer, sources = generate_answer("Tell me what was the 30 year fixed mortgage rate along with the date?")
     print(f"Answer: {answer}")
     print(f"Sources: {sources}")
     """ results = vector_store.similarity_search(
