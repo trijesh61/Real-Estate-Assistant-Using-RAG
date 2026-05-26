@@ -80,6 +80,7 @@ def process_urls(urls):
 
 prompt = ChatPromptTemplate.from_template("""
 Answer the question based only on the provided context.
+No preamble
 
 Context:
 {context}
