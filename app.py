@@ -28,7 +28,7 @@ if query:
         st.write(answer)
         if sources:
             st.subheader("Sources:")
-            for source in sources.split("\n"):
+            for source in sources:
                 st.write(source)
     except RuntimeError as e:
         placeholder.text("You must process urls first")
