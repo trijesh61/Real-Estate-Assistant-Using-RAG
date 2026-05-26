@@ -129,8 +129,3 @@ Answer + Sources
 - LLM Integration using Groq
 - Streamlit-based AI Applications
 
----
-
-## 📜 License
-
-This project is developed for educational and learning purposes. Please ensure compliance with the licenses and terms of use of all third-party libraries, APIs, and datasets used in the application.
