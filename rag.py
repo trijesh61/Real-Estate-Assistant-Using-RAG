@@ -5,8 +5,8 @@ warnings.filterwarnings('ignore')
 
 from dotenv import load_dotenv
 from pathlib import Path
-from langchain_classic.chains import RetrievalQAWithSourcesChain
-
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import UnstructuredURLLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
@@ -76,15 +76,48 @@ def process_urls(urls):
     yield "Done adding docs to vector database...."
 
 
+
+
+prompt = ChatPromptTemplate.from_template("""
+Answer the question based only on the provided context.
+
+Context:
+{context}
+
+Question:
+{question}
+""")
+
+
 def generate_answer(query):
     if not vector_store:
-        raise RuntimeError("Vector database is not initialized ")
+        raise RuntimeError("Vector database is not initialized")
 
-    chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vector_store.as_retriever())
-    result = chain.invoke({"question": query}, return_only_outputs=True)
-    sources = result.get("sources", " ")
+    # Retrieve relevant documents
+    retriever = vector_store.as_retriever()
+    docs = retriever.invoke(query)
 
-    return result['answer'], sources    
+    # Combine document contents
+    context = "\n\n".join(doc.page_content for doc in docs)
+
+    # Create chain
+    chain = prompt | llm | StrOutputParser()
+
+    # Generate answer
+    answer = chain.invoke({
+        "context": context,
+        "question": query
+    })
+
+    # Extract sources
+    sources = list(
+        set(
+            doc.metadata.get("source", "Unknown")
+            for doc in docs
+        )
+    )
+
+    return answer, sources
 
 
 
